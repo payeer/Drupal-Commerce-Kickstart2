@@ -204,7 +204,7 @@ function commerce_payeer_build_redirect_form($form, &$form_state, $order, $setti
 	
 	$m_amount = commerce_currency_amount_to_decimal($amount, $m_curr);
 	
-	$m_desc = base64_encode(commerce_payeer_get_settings('order_desc') . $m_orderid);
+	$m_desc = base64_encode(commerce_payeer_get_settings('order_desc'));
 
 	if ($m_curr == 'RUR')
 	{
@@ -224,109 +224,43 @@ function commerce_payeer_build_redirect_form($form, &$form_state, $order, $setti
 	
 	$sign = strtoupper(hash('sha256', implode(':', $arHash)));
 	
-	// проверка принадлежности ip списку доверенных ip
+	$form['#action'] = $m_url;
 	
-	$ip_filter = commerce_payeer_get_settings('ip_filter');
+	$form['m_shop'] = array(
+		'#type' => 'hidden',
+		'#value' => $m_shop,
+	);
 	
-	$list_ip_str = str_replace(' ', '', $ip_filter);
-	
-	if (!empty($list_ip_str)) 
-	{
-		$list_ip = explode(',', $list_ip_str);
-		$this_ip = $_SERVER['REMOTE_ADDR'];
-		$this_ip_field = explode('.', $this_ip);
-		$list_ip_field = array();
-		$i = 0;
-		$valid_ip = FALSE;
-		foreach ($list_ip as $ip)
-		{
-			$ip_field[$i] = explode('.', $ip);
-			if ((($this_ip_field[0] ==  $ip_field[$i][0]) or ($ip_field[$i][0] == '*')) and
-				(($this_ip_field[1] ==  $ip_field[$i][1]) or ($ip_field[$i][1] == '*')) and
-				(($this_ip_field[2] ==  $ip_field[$i][2]) or ($ip_field[$i][2] == '*')) and
-				(($this_ip_field[3] ==  $ip_field[$i][3]) or ($ip_field[$i][3] == '*')))
-				{
-					$valid_ip = TRUE;
-					break;
-				}
-			$i++;
-		}
-	}
-	else
-	{
-		$valid_ip = TRUE;
-	}
-	
-	if ($valid_ip)
-	{
-		$form['#action'] = $m_url;
-		
-		$form['m_shop'] = array(
-			'#type' => 'hidden',
-			'#value' => $m_shop,
-		);
-		
-		$form['m_orderid'] = array(
-			'#type' => 'hidden',
-			'#value' => $m_orderid,
-		);
+	$form['m_orderid'] = array(
+		'#type' => 'hidden',
+		'#value' => $m_orderid,
+	);
 
-		$form['m_amount'] = array(
-			'#type' => 'hidden',
-			'#value' => $m_amount,
-		);
-		
-		$form['m_curr'] = array(
-			'#type' => 'hidden',
-			'#value' => $m_curr,
-		);
-		
-		$form['m_desc'] = array(
-			'#type' => 'hidden',
-			'#value' => $m_desc,
-		);
-		
-		$form['m_sign'] = array(
-			'#type' => 'hidden',
-			'#value' => $sign,
-		);
-		
-		$form['submit'] = array(
-			'#type' => 'submit',
-			'#value' => t('Pay'),
-		);
-	}
-	else
-	{
-		$form['#action'] = commerce_payeer_server_fail_url();
-		
-		$form['submit'] = array(
-			'#type' => 'submit',
-			'#value' => t('Pay'),
-		);
-		
-		$email_error = commerce_payeer_get_settings('email_error');
-		
-		$log_text = 
-			"--------------------------------------------------------\n".
-			"shop				" . $m_shop . "\n".
-			"order id			" . $m_orderid . "\n".
-			"amount				" . $m_amount . "\n".
-			"currency			" . $m_curr . "\n".
-			"description		" . base64_decode($m_desc) . "\n".
-			"sign				" . $sign . "\n\n";
-					
-		$to = $email_error;
-		$subject = "Error payment";
-		$message = "Failed to make the payment through the system Payeer for the following reasons:\n\n";
-		$message .= " - the ip address of the server is not trusted\n";
-		$message .= "   trusted ip: " . $ip_filter . "\n";
-		$message .= "   ip of the current server: " . $_SERVER['REMOTE_ADDR'] . "\n";
-		$message .= "\n" . $log_text;
-		$headers = "From: no-reply@" . this_server_url() . "\r\nContent-type: text/plain; charset=utf-8 \r\n";
-		mail($to, $subject, $message, $headers);
-	}
+	$form['m_amount'] = array(
+		'#type' => 'hidden',
+		'#value' => $m_amount,
+	);
 	
+	$form['m_curr'] = array(
+		'#type' => 'hidden',
+		'#value' => $m_curr,
+	);
+	
+	$form['m_desc'] = array(
+		'#type' => 'hidden',
+		'#value' => $m_desc,
+	);
+	
+	$form['m_sign'] = array(
+		'#type' => 'hidden',
+		'#value' => $sign,
+	);
+	
+	$form['submit'] = array(
+		'#type' => 'submit',
+		'#value' => t('Pay'),
+	);
+
 	return $form;
 }
 
@@ -419,6 +353,39 @@ function commerce_payeer_status()
 					
 			$sign_hash = strtoupper(hash('sha256', implode(':', $arHash)));
 			
+			// проверка принадлежности ip списку доверенных ip
+	
+			$ip_filter = commerce_payeer_get_settings('ip_filter');
+			
+			$list_ip_str = str_replace(' ', '', $ip_filter);
+			
+			if (!empty($list_ip_str)) 
+			{
+				$list_ip = explode(',', $list_ip_str);
+				$this_ip = $_SERVER['REMOTE_ADDR'];
+				$this_ip_field = explode('.', $this_ip);
+				$list_ip_field = array();
+				$i = 0;
+				$valid_ip = FALSE;
+				foreach ($list_ip as $ip)
+				{
+					$ip_field[$i] = explode('.', $ip);
+					if ((($this_ip_field[0] ==  $ip_field[$i][0]) or ($ip_field[$i][0] == '*')) and
+						(($this_ip_field[1] ==  $ip_field[$i][1]) or ($ip_field[$i][1] == '*')) and
+						(($this_ip_field[2] ==  $ip_field[$i][2]) or ($ip_field[$i][2] == '*')) and
+						(($this_ip_field[3] ==  $ip_field[$i][3]) or ($ip_field[$i][3] == '*')))
+						{
+							$valid_ip = TRUE;
+							break;
+						}
+					$i++;
+				}
+			}
+			else
+			{
+				$valid_ip = TRUE;
+			}
+	
 			$log_text = 
 				"--------------------------------------------------------\n".
 				"operation id		" . $_POST["m_operation_id"] . "\n".
@@ -438,7 +405,7 @@ function commerce_payeer_status()
 				file_put_contents($_SERVER['DOCUMENT_ROOT'] . '/payeer_orders.log', $log_text, FILE_APPEND);
 			}
 					
-			if ($_POST['m_sign'] == $sign_hash && $_POST['m_status'] == 'success')
+			if ($_POST['m_sign'] == $sign_hash && $_POST['m_status'] == 'success' && $valid_ip)
 			{
 				commerce_payeer_create_transaction($_POST['m_orderid'], abs($_POST['m_amount']), $_POST['m_operation_id']);
 				
@@ -461,6 +428,13 @@ function commerce_payeer_status()
 				if ($_POST['m_status'] != "success")
 				{
 					$message.=" - The payment status is not success\n";
+				}
+				
+				if (!$valid_ip)
+				{
+					$message .= " - the ip address of the server is not trusted\n";
+					$message .= "   trusted ip: " . $ip_filter . "\n";
+					$message .= "   ip of the current server: " . $_SERVER['REMOTE_ADDR'] . "\n";
 				}
 				
 				$message.="\n" . $log_text;
