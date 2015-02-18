@@ -193,6 +193,8 @@ function commerce_payeer_build_redirect_form($form, &$form_state, $order, $setti
 	
 	$m_amount = commerce_currency_amount_to_decimal($amount, $m_curr);
 	
+	$m_amount = number_format($m_amount, 2, '.', '');
+	
 	$m_desc = base64_encode(commerce_payeer_get_settings('order_desc'));
 
 	if ($m_curr == 'RUR')
