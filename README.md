@@ -5,4 +5,4 @@ Drupal
 Для установки модуля скачайте и распакуйте архив.
 Далее следуйте прилагаемой инструкции
 
-Поддержка версии CMS Payeer Drupal 7 (сборка Commerce Kickstart2)
+Поддержка версии CMS Drupal 7 (сборка Commerce Kickstart2)
