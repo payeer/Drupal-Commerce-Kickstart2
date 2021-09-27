@@ -379,7 +379,8 @@ function commerce_payeer_status()
 			{
 				// загрузка заказа
 				
-				$order = commerce_order_load($_POST['m_orderid']);
+				$order_id = preg_replace('/[^a-zA-Z0-9_-]/', '', substr($_POST['m_orderid'], 0, 32));
+				$order = commerce_order_load($order_id);
 
 				if (!$order)
 				{
@@ -416,7 +417,7 @@ function commerce_payeer_status()
 						switch ($_POST['m_status'])
 						{
 							case 'success':
-								commerce_payeer_create_transaction($_POST['m_orderid'], abs($_POST['m_amount']), $_POST['m_operation_id']);
+								commerce_payeer_create_transaction($order_id, abs($_POST['m_amount']), $_POST['m_operation_id']);
 								break;
 								
 							default:
