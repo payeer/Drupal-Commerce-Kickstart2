@@ -18,87 +18,87 @@ function commerce_payeer_settings_form($settings = NULL)
 
 	$form['merchant_url'] = array(
 		'#type' => 'textfield',
-		'#title' => t('URL мерчанта'),
-		'#description' => t('ссылка для оплаты в системе Payeer'),
+		'#title' => t('Merchant URL'),
+		'#description' => t('The URL for the payment'),
 		'#default_value' => 'https://payeer.com/merchant/',
 	);
 
 	$form['merchant_id'] = array(
 		'#type' => 'textfield',
-		'#title' => t('Идентификатор магазина'),
-		'#description' => t('Идентификатор магазина, зарегистрированного в системе "PAYEER".'),
+		'#title' => t('ID store'),
+		'#description' => t('The store identifier registered in Payeer'),
 		'#default_value' => $settings['merchant_id'],
 	);
 
 	$form['secret_key'] = array(
 		'#type' => 'textfield',
-		'#title' => t('Секретный ключ'),
-		'#description' => t('Секретный ключ магазина'),
+		'#title' => t('Secret key'),
+		'#description' => t('The secret key of merchant'),
 		'#default_value' => $settings['secret_key'],
 	);
 
 	$form['ip_filter'] = array(
 		'#type' => 'textfield',
-		'#title' => t('IP - фильтр'),
-		'#description' => t('Список доверенных ip адресов, можно указать маску'),
+		'#title' => t('IP - filter'),
+		'#description' => t('The list of trusted ip addresses, you can specify the mask'),
 		'#default_value' => $settings['ip_filter'],
 	);
 
 	$form['email_error'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Email'),
-		'#description' => t('Email для отправки ошибок оплаты'),
+		'#description' => t('Email to send payment errors'),
 		'#default_value' => $settings['email_error'],
 	);
 	
 	$form['payeer_log'] = array(
 		'#type' => 'textfield',
-		'#title' => t('Путь до журнала платежных операций (например, /payeer_orders.log)'),
-		'#description' => t('Если путь не указан, то журнал не записывается'),
+		'#title' => t('The path to the log file for payments via Payeer (for example, /payeer_orders.log)'),
+		'#description' => t('If path is not specified, the log is not written'),
 		'#default_value' => $settings['payeer_log'],
 	);
 
 	$form['success_message'] = array(
 		'#type' => 'textarea',
 		'#rows' => 3,
-		'#title' => t('Удачный платеж'),
-		'#description' => t('Сообщение об удачной оплате'),
+		'#title' => t('Successful payment'),
+		'#description' => t('The message about the successful payment'),
 		'#default_value' => $settings['success_message'],
 	);
 
 	$form['fail_message'] = array(
 		'#type' => 'textarea',
 		'#rows' => 3,
-		'#title' => t('Неудачный платеж'),
-		'#description' => t('Сообщение о неудачной оплате'),
+		'#title' => t('Failed payment'),
+		'#description' => t('The message about a failed payment'),
 		'#default_value' => $settings['fail_message'],
 	);
 
 	$form['url'] = array(
 		'#type' => 'fieldset',
 		'#collapsible' => TRUE,
-		'#title' => t('URL (success, fail, status) для магазина Payeer')
+		'#title' => t('URL (success, fail, status) for Payeer store')
 	);
 
 	$form['url']['success'] = array(
 		'#type' => 'textfield',
-		'#title' => t('URL успешной оплаты'),
+		'#title' => t('Success URL'),
 		'#value' => url('payeer/success', array('absolute' => TRUE)),
-		'#description' => t("укажите этот url в аккаунте Payeer")
+		'#description' => t("enter this url in the store settings")
 	);
 
 	$form['url']['fail'] = array(
 		'#type' => 'textfield',
-		'#title' => t('URL неуспешной оплаты'),
+		'#title' => t('Fail URL'),
 		'#value' => url('payeer/fail', array('absolute' => TRUE)),
-		'#description' => t("укажите этот url в аккаунте Payeer")
+		'#description' => t("enter this url in the store settings")
 	);
 	
 	$form['url']['status'] = array(
 		'#type' => 'textfield',
-		'#title' => t('URL обработчика'),
+		'#title' => t('Status URL'),
 		'#value' => url('payeer/status', array('absolute' => TRUE)),
-		'#description' => t("укажите этот url в аккаунте Payeer")
+		'#description' => t("enter this url in the store settings")
 	);
 
 	$form['#submit'][] = variable_set('commerce_payeer_settings', $form);
@@ -133,7 +133,7 @@ function commerce_payeer_submit_form($payment_method, $pane_values, $checkout_pa
 		'title' => t('Payeer'),
 		'attributes' => array('class' => 'logo-payeer'),
 	));
-	$text .= '<div class="desc">' . t('Payeer - Используйте множество платежных систем и банков в одном кошельке!') . '</div>';
+	$text .= '<div class="desc">' . t('Payeer® Merchant allows you to accept international payments by a lot of payment methods around the world!') . '</div>';
 	$build['print_receipt'] = array('#markup' => $text);
 	return $build;
 }
@@ -141,21 +141,21 @@ function commerce_payeer_submit_form($payment_method, $pane_values, $checkout_pa
 function commerce_payeer_menu() 
 {
 	$items['payeer/status'] = array(
-		'title' => 'Cтатус оплаты заказа',
+		'title' => 'The payment status of the order',
 		'page callback' => 'commerce_payeer_status',
 		'access callback' => TRUE,
 		'type' => MENU_CALLBACK,
 	);
 	
 	$items['payeer/success'] = array(
-		'title' => 'Успешный платеж',
+		'title' => 'Successful payment',
 		'page callback' => 'commerce_payeer_success',
 		'access arguments' => array('access content'),
 		'type' => MENU_CALLBACK,
 	);
 	
 	$items['payeer/fail'] = array(
-		'title' => 'Неудачный платеж',
+		'title' => 'Failed payment',
 		'page callback' => 'commerce_payeer_fail',
 		'access arguments' => array('access content'),
 		'type' => MENU_CALLBACK,
@@ -180,7 +180,7 @@ function commerce_payeer_build_redirect_form($form, &$form_state, $order, $setti
 	$amount = $wrapper->commerce_order_total->amount->value();
 	$m_amount = commerce_currency_amount_to_decimal($amount, $m_curr);
 	$m_amount = number_format($m_amount, 2, '.', '');
-	$m_desc = base64_encode('Оплата заказа №' . $m_orderid);
+	$m_desc = base64_encode('Order payment №' . $m_orderid);
 	$m_key = commerce_payeer_get_settings('secret_key');
 
 	$arHash = array(
@@ -226,7 +226,7 @@ function commerce_payeer_build_redirect_form($form, &$form_state, $order, $setti
 	
 	$form['submit'] = array(
 		'#type' => 'submit',
-		'#value' => t('Оплатить'),
+		'#value' => t('Payment'),
 	);
 	
 	return $form;
@@ -267,7 +267,7 @@ function commerce_payeer_success()
 	
 	if (isset($order_id) && isset($_GET['m_status'])) 
 	{
-		$message = t('Спасибо, ваш заказ оплачен! Ордер #@shop_order,<br />', array('@shop_order' => $order_id));
+		$message = t('Thank you, your order has been paid! Order #@shop_order,<br />', array('@shop_order' => $order_id));
 		
 		drupal_set_message($message, 'status');
 		
@@ -307,7 +307,7 @@ function commerce_payeer_status()
 			$err = false;
 			$message = '';
 			
-			// запись логов
+			// logging
 			
 			$log_text = 
 			"--------------------------------------------------------\n" .
@@ -330,7 +330,7 @@ function commerce_payeer_status()
 				file_put_contents($_SERVER['DOCUMENT_ROOT'] . $log_file, $log_text, FILE_APPEND);
 			}
 			
-			// проверка цифровой подписи и ip
+			// digital signature and ip verification
 
 			$sign_hash = strtoupper(hash('sha256', implode(":", array(
 				$_POST['m_operation_id'],
@@ -363,27 +363,27 @@ function commerce_payeer_status()
 			
 			if (!$valid_ip)
 			{
-				$message .= " - ip-адрес сервера не является доверенным\n" .
-				"   доверенные ip: " . $sIP . "\n" .
-				"   ip текущего сервера: " . $_SERVER['REMOTE_ADDR'] . "\n";
+				$message .= " - the ip address of the server is not trusted\n" .
+				"   trusted ip: " . $sIP . "\n" .
+				"   ip of the current server: " . $_SERVER['REMOTE_ADDR'] . "\n";
 				$err = true;
 			}
 
 			if ($_POST['m_sign'] != $sign_hash)
 			{
-				$message .= " - не совпадают цифровые подписи\n";
+				$message .= " - do not match the digital signature\n";
 				$err = true;
 			}
 			
 			if (!$err)
 			{
-				// загрузка заказа
-				
-				$order = commerce_order_load($_POST['m_orderid']);
+				// order loading
+				$order_id = preg_replace('/[^a-zA-Z0-9_-]/', '', substr($_POST['m_orderid'], 0, 32));
+				$order = commerce_order_load($order_id);
 
 				if (!$order)
 				{
-					$message .= " - несуществующий ордер\n";
+					$message .= " - undefined order\n";
 					$err = true;
 				}
 				else
@@ -395,32 +395,32 @@ function commerce_payeer_status()
 					$order_amount = commerce_currency_amount_to_decimal($order_amount, $order_curr);
 					$order_amount = number_format($order_amount, 2, '.', '');
 					
-					// проверка суммы и валюты
+					// check the amount and currency
 				
 					if ($_POST['m_amount'] != $order_amount)
 					{
-						$message .= " - неправильная сумма\n";
+						$message .= " - wrong amount\n";
 						$err = true;
 					}
 
 					if ($_POST['m_curr'] != $order_curr)
 					{
-						$message .= " - неправильная валюта\n";
+						$message .= " - wrong currency\n";
 						$err = true;
 					}
 					
-					// проверка статуса
+					// status check
 					
 					if (!$err)
 					{
 						switch ($_POST['m_status'])
 						{
 							case 'success':
-								commerce_payeer_create_transaction($_POST['m_orderid'], abs($_POST['m_amount']), $_POST['m_operation_id']);
+								commerce_payeer_create_transaction($order_id, abs($_POST['m_amount']), $_POST['m_operation_id']);
 								break;
 								
 							default:
-								$message .= " - статус платежа не является success\n";
+								$message .= " - the payment status is not success\n";
 								$err = true;
 								break;
 						}
@@ -434,10 +434,10 @@ function commerce_payeer_status()
 
 				if (!empty($to))
 				{
-					$message = "Не удалось провести платёж через систему Payeer по следующим причинам:\n\n" . $message . "\n" . $log_text;
+					$message = "Failed to make the payment through the system Payeer for the following reasons:\n\n" . $message . "\n" . $log_text;
 					$headers = "From: no-reply@" . $_SERVER['HTTP_HOST'] . "\r\n" . 
 					"Content-type: text/plain; charset=utf-8 \r\n";
-					mail($to, 'Ошибка оплаты', $message, $headers);
+					mail($to, 'Payment error', $message, $headers);
 				}
 				
 				exit($_POST['m_orderid'] . '|error');
